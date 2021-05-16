@@ -1,5 +1,7 @@
 # Reminder bot
 
+A bot to remind me of various things
+
 ## MVP
 
 1. Allow user to create recurring reminders:
@@ -13,29 +15,3 @@
 
 1. Allow creation of 1 time events
 1. Allow muting and un-muting of specific / all events
-
-## Design
-
-### subscription
-
-* username
-* config_group_identity
-
-### config
-
-* config_group_identity
-* id
-* todo
-* frequency
-  * cron
-  * start_time
-  * end_time
-* repetition_count
-
-### event
-
-* id
-* config_id
-* todo
-* event_time
-* remaining_repetition_count

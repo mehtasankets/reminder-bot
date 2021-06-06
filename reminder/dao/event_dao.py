@@ -52,3 +52,13 @@ class EventDao():
                     id = {event.id}
             """)
         self.connection.commit()
+
+    def mark_as_done(self, event_id):
+        self.connection.execute(
+            f"""
+                UPDATE event
+                SET remaining_repetition_count = 0
+                WHERE
+                    id = {event_id}
+            """)
+        self.connection.commit()

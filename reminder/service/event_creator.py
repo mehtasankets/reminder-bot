@@ -46,4 +46,4 @@ class EventCreator():
         wait_seconds = (next_hour - now).seconds
         log.debug(f"Current time is {now}")
         log.info(f"Sleeping for {wait_seconds} seconds i.e. until {next_hour}")
-        time.sleep(wait_seconds)
+        time.sleep(0)

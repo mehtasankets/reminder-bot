@@ -21,3 +21,13 @@ class SubscriptionDao():
                 VALUES({subscription.user_id}, '{subscription.username}', '{subscription.config_group_identity}')
             """)
         self.connection.commit()
+
+    def unsubscribe(self, subscription):
+        self.connection.execute(
+            f"""
+                DELETE FROM subscription
+                WHERE user_id = '{subscription.user_id}'
+                    AND username = '{subscription.username}'
+                    AND config_group_identity = '{subscription.config_group_identity}'
+            """)
+        self.connection.commit()

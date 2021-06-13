@@ -12,11 +12,9 @@ def main():
     log = logging.getLogger(__name__)
     log.info("Welcome to Reminder Bot!")
 
-    db_file_path = os.path.abspath('./etc/reminders.db')
+    db_file_path = os.path.abspath(os.environ['REMINDER_BOT_DB_PATH'])
     connection = sqlite3.connect(db_file_path, check_same_thread=False)
-
-    with open('./etc/token', 'r') as f:
-        token = f.read().strip()
+    token = os.environ['TELEGRAM_BOT_TOKEN']
     telegram_interactor = TelegramInteractor(token, connection)
 
     t1 = threading.Thread(name='TelegramInteractor',

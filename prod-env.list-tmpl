@@ -1,2 +1,3 @@
 VERSION=<docker-image-version>
 REMINDER_BOT_DB_HOST_LOCATION=<reminders.db-file-location>
+TELEGRAM_BOT_TOKEN=<telegram-bot-token>

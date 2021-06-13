@@ -15,3 +15,16 @@ A bot to remind me of various things
 
 1. Allow creation of 1 time events
 1. Allow muting and un-muting of specific / all events
+
+## Cloud run
+
+```
+(One time) git clone https://github.com/mehtasankets/reminder-bot.git
+cd reminder-bot
+git pull
+(One time) cp prod-env.list-tmpl prod-env.list
+(One time) Edit prod-env.list to populate environment variables
+Run db query versions if any
+docker-compose down
+./run.sh
+```

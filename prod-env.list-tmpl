@@ -1,0 +1,2 @@
+VERSION=<docker-image-version>
+REMINDER_BOT_DB_HOST_LOCATION=<reminders.db-file-location>

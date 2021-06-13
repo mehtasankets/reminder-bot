@@ -1,0 +1,8 @@
+version: "3.8"
+services:
+    reminder-bot:
+        image: mehtasankets/reminder-bot:$VERSION
+        environment: 
+            - REMINDER_BOT_DB_PATH=/reminders.db
+        volumes:
+            - ${REMINDER_BOT_DB_HOST_LOCATION}:/reminders.db

@@ -1,10 +1,13 @@
-from telebot.types import KeyboardButton, ReplyKeyboardMarkup
+from telebot.types import KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from reminder.model.event import Event
 from reminder.dao.event_dao import EventDao
+from reminder.dao.config_dao import ConfigDao
 from reminder.model.subscription import Subscription
 from reminder.dao.subscription_dao import SubscriptionDao
+import reminder.util.event_util as EventUtil
 import telebot
 import logging
+from datetime import datetime
 
 help_str = """
 Supported commands:
@@ -15,12 +18,39 @@ Supported commands:
     /listsubscriptions
 """
 
+log = logging.getLogger(__name__)
+
 
 class TelegramInteractor():
     def __init__(self, token, connection):
         self.telegram_bot_instance = telebot.TeleBot(token)
         self.subscription_dao = SubscriptionDao(connection)
         self.event_dao = EventDao(connection)
+        self.config_dao = ConfigDao(connection)
+
+    def refresh_list(self, config_group_identity):
+        current_time = datetime.now()
+        log.debug(f"Refresh time= {current_time}, {config_group_identity}")
+        events = self.event_dao.fetch_all_active()
+        configs_list = self.config_dao.fetch_all()
+        configs = dict([(x.id, x) for x in configs_list])
+        events_to_be_notified = []
+        for event in events:
+            config = configs[event.config_id]
+            if event.remaining_repetition_count < config.repetition_count and event.config_group_identity == config_group_identity:
+                events_to_be_notified.append(event)
+        if len(events_to_be_notified) > 0:
+            log.debug(f"Events to report= {events_to_be_notified}")
+            group_messages = EventUtil.generate_telegram_notifications(
+                events_to_be_notified)
+            log.debug(f"group_messages= {group_messages}")
+            self.notify(group_messages)
+        else:
+            subscriptions = self.subscription_dao.fetch_all()
+            for s in subscriptions:
+                if s.config_group_identity == config_group_identity:
+                    self.telegram_bot_instance.send_message(
+                        s.user_id, 'No more reminders for now! :)', reply_markup=ReplyKeyboardRemove())
 
     def notify(self, group_messages):
         subscriptions = self.subscription_dao.fetch_all()
@@ -31,7 +61,7 @@ class TelegramInteractor():
         for group_identity, value in group_messages.items():
             user_ids = subscription_details[group_identity]
             event_ids = value[1]
-            print(event_ids)
+            log.info(event_ids)
             reply_markup = ReplyKeyboardMarkup()
             for id in event_ids:
                 reply_markup.add(f"/done {id}", row_width=3)
@@ -82,12 +112,25 @@ class TelegramInteractor():
         def done(message):
             event_id = " ".join(message.text.split()[1:])
             self.event_dao.mark_as_done(event_id)
-            self.telegram_bot_instance.reply_to(
-                message, f"Marked event number {event_id} as done!")
+            event = self.event_dao.fetch(event_id)
+            subscriptions = self.subscription_dao.fetch_all()
+            user_ids = []
+            for s in subscriptions:
+                if (s.config_group_identity == event.config_group_identity):
+                    user_ids.append(s.user_id)
+            for user_id in user_ids:
+                self.telegram_bot_instance.send_message(
+                    user_id, f"{message.from_user.first_name} marked event {event_id} as done!")
+            self.refresh_list(event.config_group_identity)
+
+        @self.telegram_bot_instance.message_handler(commands=['refresh'])
+        def refresh(message):
+            config_group_identity = " ".join(message.text.split()[1:])
+            self.refresh_list(config_group_identity)
 
         @self.telegram_bot_instance.message_handler(func=lambda message: True)
         def default_message_reply(message):
             self.telegram_bot_instance.reply_to(
                 message, "Invalid command\n" + help_str)
 
-        self.telegram_bot_instance.polling()
+        self.telegram_bot_instance.polling(True)

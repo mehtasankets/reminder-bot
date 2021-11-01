@@ -7,7 +7,7 @@ import os
 
 def main():
 
-    db_file_path = os.path.abspath('./etc/reminders.db')
+    db_file_path = os.path.abspath('./reminders.db')
     connection = sqlite3.connect(db_file_path, check_same_thread=False)
     config_dao = ConfigDao(connection)
 

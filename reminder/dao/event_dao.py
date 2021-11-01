@@ -23,6 +23,23 @@ class EventDao():
             events.append(event)
         return events
 
+    def fetch(self, event_id):
+        cursor = self.connection.execute(
+            f"""
+                SELECT 
+                    id, config_id, config_group_identity, todo, 
+                    next_trigger_time, remaining_repetition_count, 
+                    snooze_for_minutes 
+                FROM event
+                WHERE id ={event_id}
+            """)
+        events = []
+        for c in cursor:
+            event = Event(c[0], c[1], c[2], c[3],
+                          datetime.fromisoformat(c[4]), c[5], c[6])
+            events.append(event)
+        return next(iter(events), None)
+
     def upsert(self, event):
         query = f"""
             INSERT INTO event (config_id, config_group_identity, todo, 

@@ -28,3 +28,12 @@ Run db query versions if any
 docker-compose down
 ./run.sh
 ```
+
+## Local run
+
+```
+.\env\Scripts\activate
+(one time) py -m pip install -r requirements.txt
+.\local-env.ps1
+py .\reminder_bot_driver.py
+```

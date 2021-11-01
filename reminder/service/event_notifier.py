@@ -1,10 +1,13 @@
 from datetime import datetime, timedelta
+import traceback
 import logging
 from reminder.dao.subscription_dao import SubscriptionDao
 from reminder.dao.event_dao import EventDao
+import reminder.util.event_util as EventUtil
 import time
 
 log = logging.getLogger(__name__)
+
 
 class EventNotifier():
     def __init__(self, telegram_interactor, connection):
@@ -25,22 +28,14 @@ class EventNotifier():
                 log.debug(events_to_be_notified)
                 if len(events_to_be_notified) > 0:
                     log.info(f"Events to be notified: {events_to_be_notified}")
-                    self.send_telegram_notification(events_to_be_notified)
+                    group_messages = EventUtil.generate_telegram_notifications(
+                        events_to_be_notified)
+                    self.telegram_interactor.notify(group_messages)
                     self.update_next_occurrence(events_to_be_notified)
             except Exception as e:
-                log.error(e)
+                log.error(traceback.format_exc())
             finally:
                 time.sleep(30)
-
-    def send_telegram_notification(self, events):
-        group_messages = {}
-        for event in events:
-            message = f"{event.id}. {event.todo} @ {event.next_trigger_time}\n"
-            group_messages[event.config_group_identity] = group_messages.get(
-                event.config_group_identity, ["", []])
-            group_messages[event.config_group_identity][0] += message
-            group_messages[event.config_group_identity][1].append(f"{event.id}")
-        self.telegram_interactor.notify(group_messages)
 
     def update_next_occurrence(self, events):
         for event in events:

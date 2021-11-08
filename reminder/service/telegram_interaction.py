@@ -5,6 +5,7 @@ from reminder.dao.config_dao import ConfigDao
 from reminder.model.subscription import Subscription
 from reminder.dao.subscription_dao import SubscriptionDao
 import reminder.util.event_util as EventUtil
+import traceback
 import telebot
 import logging
 from datetime import datetime
@@ -133,4 +134,7 @@ class TelegramInteractor():
             self.telegram_bot_instance.reply_to(
                 message, "Invalid command\n" + help_str)
 
-        self.telegram_bot_instance.polling(True)
+        try:
+            self.telegram_bot_instance.polling(True)
+        except Exception as e:
+            log.error(traceback.format_exc())

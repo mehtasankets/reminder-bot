@@ -34,7 +34,7 @@ class TelegramInteractor():
         log.debug(f"Refresh time= {current_time}, {config_group_identity}")
         events = self.event_dao.fetch_all_active()
         configs_list = self.config_dao.fetch_all()
-        configs = dict([(x.id, x) for x in configs_list])
+        configs = {x.id: x for x in configs_list}
         events_to_be_notified = []
         for event in events:
             config = configs[event.config_id]

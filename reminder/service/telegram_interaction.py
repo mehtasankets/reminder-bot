@@ -1,3 +1,4 @@
+from telebot import apihelper
 from telebot.types import KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from reminder.model.event import Event
 from reminder.dao.event_dao import EventDao
@@ -24,6 +25,7 @@ log = logging.getLogger(__name__)
 
 class TelegramInteractor():
     def __init__(self, token, connection):
+        apihelper.SESSION_TIME_TO_LIVE = 300
         self.telegram_bot_instance = telebot.TeleBot(token)
         self.subscription_dao = SubscriptionDao(connection)
         self.event_dao = EventDao(connection)

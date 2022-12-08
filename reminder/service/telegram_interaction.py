@@ -113,7 +113,12 @@ class TelegramInteractor():
 
         @self.telegram_bot_instance.message_handler(commands=['done'])
         def done(message):
+            log.info(f"Received '{message.text}' as done command")
             event_id = " ".join(message.text.split()[1:])
+            log.info(f"{event_id} was extracted as event_id")
+            
+            if not event_id:
+                return
             self.event_dao.mark_as_done(event_id)
             event = self.event_dao.fetch(event_id)
             subscriptions = self.subscription_dao.fetch_all()

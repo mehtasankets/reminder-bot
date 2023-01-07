@@ -142,6 +142,6 @@ class TelegramInteractor():
                 message, "Invalid command\n" + help_str)
 
         try:
-            self.telegram_bot_instance.polling(True)
+            self.telegram_bot_instance.infinity_polling()
         except Exception as e:
             log.error(traceback.format_exc())
